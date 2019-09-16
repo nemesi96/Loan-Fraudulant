@@ -1,0 +1,372 @@
+---
+title: "Assignment 2"
+author: "Vishnu Prasanth Reddy Patur"
+date: "9/11/2019"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r echo=FALSE , message=FALSE, warning=FALSE, packages}
+#***********Question_1A***************
+
+#install.packages('ggplot2')
+# install.packages("ggpubr")
+# install.packages('magrittr')
+library(ggpubr)
+library(ggplot2)
+library(knitr)
+
+setwd('C:/Users/vipra/Desktop/SElf Learning/R_Self/datasets')
+Assig<-read.csv ('HMEQ.csv')
+```
+
+## Question : 1A
+
+```{r }
+
+summary_stat_func <-function(x){
+  mean_1 <- mean(x,na.rm = TRUE)
+  median_1<-median(x,na.rm = TRUE)
+  std_1 <- sd(x,na.rm= TRUE)
+  if (mean_1>median_1){
+    skewness='Right Skewed'
+  }
+  if (mean_1<median_1){
+    skewness ='Left Skewed'
+  }
+  a<-sum(as.numeric(is.na(x)))
+  percentage_1<-(a/nrow(Assig))*100
+  stats<- c(mean_1,median_1,std_1,skewness,percentage_1)
+  return(stats)
+}
+
+
+
+req_attrib<-c("LOAN","MORTDUE","VALUE","YOJ","CLAGE","DEBTINC")
+data_sub<- subset(Assig,select=req_attrib)
+result<-apply(data_sub, 2, summary_stat_func)
+rownames(result)<-c('Mean','Median','Standard Deviation','Skewness','Missing Value Percentage')
+result_1a<-as.data.frame(result)
+
+kable(result_1a)
+
+
+```
+
+
+
+
+## Question : 1B
+```{r }
+#***********Question_1B***************
+data_assin_1b<-subset(Assig,Assig$BAD==1,select = req_attrib)
+result<-apply(data_assin_1b, 2, summary_stat_func)
+rownames(result)<-c('Mean','Median','Standard Deviation','Skewness','Missing Value Percentage')
+result_1b<-as.data.frame(result)
+kable(result_1b)
+
+```
+
+
+
+## Question : 1C
+```{r }
+#***********Question_1C***************
+data_assin_1b<-subset(Assig,Assig$BAD==0,select = req_attrib)
+result<-apply(data_assin_1b, 2, summary_stat_func)
+rownames(result)<-c('Mean','Median','Standard Deviation','Skewness','Missing Value Percentage')
+result_1c<-as.data.frame(result)
+kable(result_1c)
+
+```
+
+
+## Question : 2A
+
+```{r}
+
+#***********Question_2A***************
+req_2<-c('BAD', 'JOB', 'DELINQ', 'NINQ','CLNO')
+Ass_2 <-subset(Assig,select = req_2)
+Ass_2[is.na(Ass_2)]<-'NA'
+Ass_2$JOB<-as.character(Ass_2$JOB)
+Ass_2$JOB[Ass_2$JOB==""]<-'NA'
+
+
+#Frequency table of Variables
+kable(xtabs(~BAD,data = Ass_2),caption = 'BAD Frequency Table')
+kable(xtabs(~JOB,data = Ass_2),caption = 'JOB Frequency Table')
+kable(xtabs(~DELINQ,data = Ass_2),caption = 'DELINQ Frequency Table')
+kable(xtabs(~NINQ,data = Ass_2),caption='NINQ Frequency Table')
+kable(xtabs(~CLNO,data = Ass_2),caption='CLNO Frequency Table')
+
+
+```
+
+## Question : 2B
+
+```{r}
+#***********Question_2B***************
+
+kable(xtabs(~JOB + BAD, data = Ass_2),caption=' two-way contingency table of the variable BAD and JOB')
+kable(xtabs(~DELINQ + BAD, data = Ass_2),caption='two-way contingency table of the variable BAD and DELINQ')
+kable(xtabs(~NINQ + BAD, data = Ass_2),caption='two-way contingency table of the variable BAD and NINQ')
+kable(xtabs(~CLNO + BAD, data = Ass_2),caption='two-way contingency table of the variable BAD and CLNO')
+```
+
+
+## Question : 3A
+
+```{r }
+
+#***********Question_3A***************
+
+hist(Assig$LOAN, # histogram
+ col="peachpuff", # column color
+ border="black",
+ prob = TRUE, # show densities instead of frequencies
+ xlab = "LOAN",
+ ylab = "Probability",
+ main = "Histogram of LOAN with imposed density lines")
+lines(density(Assig$LOAN), # density plot
+ lwd = 3, # thickness of line
+ col = "red")
+#curve(dnorm(, mean=mean(data$Ozone), sd=sd(data$Ozone)), add=T)
+lines(Assig$LOAN,dnorm(Assig$LOAN, mean=mean(Assig$LOAN), sd=sd(Assig$LOAN)),col='blue',lwd=3)
+legend("topright", c("Normal Density", "Kernal Density"), fill=c("blue", "red"))
+```
+
+
+
+## Question : 3B
+
+```{r }
+
+mort<-na.omit(Assig$MORTDUE)
+
+
+hist(mort, # histogram
+  breaks = 125,
+ col="peachpuff", # column color
+ border="black",
+ prob = TRUE, # show densities instead of frequencies
+ xlab = "Mortdue",
+ ylab = "Probability",
+ xlim = c(2000,250000),
+ main = "Histogram of MORTDUE with imposed density lines")
+lines(density(mort), # density plot
+ lwd = 3, # thickness of line
+ col = "red")
+points(seq(min(mort),max(mort),length.out = 10000),
+       dnorm(seq(min(mort),max(mort),length.out = 10000),
+             mean(mort),sd(mort)),type="l",col="blue",lwd=2)
+legend("topright", c("Normal Density", "Kernal Density"), fill=c("blue", "red"))
+
+
+```
+
+
+
+
+## Question : 3C
+```{r  }
+
+value<-na.omit(Assig$VALUE)
+
+
+hist(value, # histogram
+  breaks = 125,
+ col="peachpuff", # column color
+ border="black",
+ prob = TRUE, # show densities instead of frequencies
+ xlab = "value",
+ ylab = "Probability",
+ xlim = c(0,400000),
+ main = "Histogram of value with imposed density lines")
+lines(density(value), # density plot
+ lwd = 3, # thickness of line
+ col = "red")
+points(seq(min(value),max(value),length.out = 1000),
+       dnorm(seq(min(value),max(value),length.out = 1000),
+             mean(value),sd(value)),type="l",col="blue",lwd=2)
+legend("topright", c("Normal Density", "Kernal Density"), fill=c("blue", "red"))
+
+```
+
+
+
+
+## Question : 3D
+```{r }
+
+clage<-na.omit(Assig$CLAGE)
+
+
+hist(clage, # histogram
+  breaks = 125,
+ col="peachpuff", # column color
+ border="black",
+ prob = TRUE, # show densities instead of frequencies
+ xlab = "CLAGE",
+ ylab = "Probability",
+ xlim = c(0,750),
+ main = "Histogram of CLAGE with imposed density lines")
+lines(density(clage), # density plot
+ lwd = 3, # thickness of line
+ col = "red")
+points(seq(min(clage),max(clage),length.out = 500),
+       dnorm(seq(min(clage),max(clage),length.out = 500),
+             mean(clage),sd(clage)),type="l",col="blue",lwd=2)
+legend("topright", c("Normal Density", "Kernal Density"), fill=c("blue", "red"))
+
+```
+
+
+
+## Question : 4A
+
+```{r }
+
+Assig_1<-na.omit(Assig)
+model<-lm(Assig_1$LOAN ~ Assig_1$MORTDUE)
+
+
+ggplot(Assig_1,aes(Assig_1$MORTDUE,Assig_1$LOAN))+
+  geom_point(size = 0.8, pch = 4,color='blue')+
+  geom_smooth(method = lm,color='red')+
+  xlim(min(Assig_1$MORTDUE),max(Assig_1$MORTDUE))+
+  ggtitle("LOAN VS MORTDUE")+
+  xlab('MORTDUE')+
+  ylab('LOAN')
+
+
+
+
+
+```
+
+
+
+
+## Question : 4B
+```{r }
+
+Assig_1<-na.omit(Assig)
+model<-lm(Assig_1$LOAN ~ Assig_1$VALUE)
+
+
+ggplot(Assig_1,aes(Assig_1$VALUE,Assig_1$LOAN))+
+  geom_point(size = 0.75, pch = 3,color='blue')+
+  geom_smooth(method = lm,color='red')+
+  ggtitle("LOAN VS VALUE")+
+  xlim(70000,512650)+
+  xlab('VALUE')+
+  ylab('LOAN')
+
+
+
+
+```
+
+
+
+
+## Question : 4C
+```{r }
+
+Assig_1<-na.omit(Assig)
+model<-lm(Assig_1$LOAN ~ Assig_1$YOJ)
+
+
+ggplot(Assig_1,aes(Assig_1$YOJ,Assig_1$LOAN))+
+  geom_point(size = 0.75, pch = 4,color='blue')+
+  geom_smooth(method = lm,color='red')+
+  ggtitle("LOAN VS YOJ")+
+  xlim(0,41)+
+  xlab('YOJ')+
+  ylab('LOAN')
+
+
+
+```
+
+
+
+## Question : 4D
+
+```{r }
+Assig_1<-na.omit(Assig)
+model<-lm(Assig_1$LOAN ~ Assig_1$CLAGE)
+
+
+ggplot(Assig_1,aes(Assig_1$CLAGE,Assig_1$LOAN))+
+  geom_point(size = 0.75, pch = 4,color='blue')+
+  geom_smooth(method = lm,color='red')+
+  ggtitle("LOAN VS CLAGE")+
+  xlim(0,max(Assig_1$CLAGE))+xlab('CLAGE')+
+  ylab('LOAN')
+  
+    
+
+
+```
+
+
+
+## Question : 4E
+
+```{r  }
+
+Assig_1<-na.omit(Assig)
+model<-lm(Assig_1$LOAN ~ Assig_1$DEBTINC)
+
+
+ggplot(Assig_1,aes(Assig_1$DEBTINC,Assig_1$LOAN))+
+  geom_point(size = 0.75, pch = 4)+
+  geom_smooth(method = lm,color='red')+
+  ggtitle("LOAN VS DEBTINC")+
+  xlim(0,max(Assig_1$DEBTINC))+
+  xlab('DEBTINC')+
+  ylab('LOAN')
+
+
+
+```
+
+
+
+
+## Question : 5
+
+```{r}
+
+data_assin<-na.omit(Assig)
+# set.seed(1234)
+# sample_index<-sample(1:nrow(data_assin),1500)
+# sample_data<-data_assin[sample_index,]
+# data_assin<-sample_data
+fit = glm(BAD ~ LOAN, data=data_assin, family=binomial)
+predicted<-predict(fit,type='response')
+plot(BAD~LOAN, data=data_assin, col="black")
+lines(data_assin$LOAN, predicted, col="red2", lwd=2)
+  
+boxplot(data_assin$LOAN~data_assin$BAD, xlab = 'BAD       0 = Fraudulant, 1 = Not Fraudulant', ylab = 'Loan')
+```
+
+### inference : 
+it's hypothetical to come to a conclusion by considering `LOAN` as a predictor and `BAD` as response, but from the plot it's noticable that the logistic regression curve is tending towards `0` and more data points above maximum value for `BAD=0` compared to `BAD=1` which can be infered that more `LOAN` the customer take, more fraudulent they tend to be.
+
+
+
+```{r}
+
+```
+
+
+
+
+
+
+
